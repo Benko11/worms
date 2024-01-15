@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+@font-face {
+  font-family: Supaplex;
+  src: url("./assets/fonts/thin_pixel-7.ttf");
+}
+
+@font-face {
+  font-family: Amstrad;
+  src: url("./assets/fonts/AcPlus_Amstrad_PC.ttf");
+}
+
+@font-face {
+  font-family: Digital;
+  src: url("./assets/fonts/digital-7.ttf");
+}
