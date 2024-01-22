@@ -1,4 +1,3 @@
-import { Player } from "./Player";
 import "./style.css";
 
 interface Vector {
@@ -13,15 +12,27 @@ ctx.lineWidth = 3;
 
 function start1() {
   const pos = [400, 400];
-  const vector = getRandomVector();
+  let vector = getRandomVector();
+  let isRightKeyDown = false;
+  let isLeftKeyDown = false;
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "ArrowLeft") {
-      decVector(vector);
+      isLeftKeyDown = true;
     }
 
     if (e.key === "ArrowRight") {
-      incVector(vector);
+      isRightKeyDown = true;
+    }
+  });
+
+  document.addEventListener("keyup", (e) => {
+    if (e.key === "ArrowLeft") {
+      isLeftKeyDown = false;
+    }
+
+    if (e.key === "ArrowRight") {
+      isRightKeyDown = false;
     }
   });
 
@@ -32,11 +43,30 @@ function start1() {
     ctx.moveTo(pos[0], pos[1]);
 
     const vectorSize = Math.sqrt(vector.x ** 2 + vector.y ** 2);
-    console.log(vectorSize);
+
+    const lookingX = pos[0] + (1.5 * vector.x) / vectorSize;
+    const lookingY = pos[1] + (1.5 * vector.y) / vectorSize;
+
+    const xxx = ctx.getImageData(lookingX, lookingY, 1, 1).data;
+    console.log(xxx);
+    if (xxx[0] > 0) {
+      clearInterval(interval);
+      return;
+    }
+
     pos[0] += vector.x / vectorSize;
     pos[1] += vector.y / vectorSize;
     ctx.lineTo(pos[0], pos[1]);
     ctx.stroke();
+
+    // rotate
+    const angle = 2.5;
+
+    if (isLeftKeyDown) {
+      vector = rotateVector(vector, -angle);
+    } else if (isRightKeyDown) {
+      vector = rotateVector(vector, angle);
+    }
 
     if (
       pos[0] < 0 ||
@@ -45,10 +75,79 @@ function start1() {
       pos[1] > playField.height
     )
       clearInterval(interval);
-  }, 10);
+  }, 20);
+}
+
+function start2() {
+  const pos = [200, 350];
+  let vector = getRandomVector();
+  let isRightKeyDown = false;
+  let isLeftKeyDown = false;
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "z") {
+      isLeftKeyDown = true;
+    }
+
+    if (e.key === "x") {
+      isRightKeyDown = true;
+    }
+  });
+
+  document.addEventListener("keyup", (e) => {
+    if (e.key === "z") {
+      isLeftKeyDown = false;
+    }
+
+    if (e.key === "x") {
+      isRightKeyDown = false;
+    }
+  });
+
+  const interval = setInterval(() => {
+    ctx.strokeStyle = "hsl(142, 71%, 45%)";
+
+    ctx.beginPath();
+    ctx.moveTo(pos[0], pos[1]);
+
+    const vectorSize = Math.sqrt(vector.x ** 2 + vector.y ** 2);
+
+    const lookingX = pos[0] + (1.5 * vector.x) / vectorSize;
+    const lookingY = pos[1] + (1.5 * vector.y) / vectorSize;
+
+    const xxx = ctx.getImageData(lookingX, lookingY, 1, 1).data;
+    console.log(xxx);
+    if (xxx[0] > 0) {
+      clearInterval(interval);
+      return;
+    }
+
+    pos[0] += vector.x / vectorSize;
+    pos[1] += vector.y / vectorSize;
+    ctx.lineTo(pos[0], pos[1]);
+    ctx.stroke();
+
+    // rotate
+    const angle = 3;
+
+    if (isLeftKeyDown) {
+      vector = rotateVector(vector, -angle);
+    } else if (isRightKeyDown) {
+      vector = rotateVector(vector, angle);
+    }
+
+    if (
+      pos[0] < 0 ||
+      pos[1] < 0 ||
+      pos[0] > playField.width ||
+      pos[1] > playField.height
+    )
+      clearInterval(interval);
+  }, 20);
 }
 
 start1();
+start2();
 
 // const player = new Player("hsl(212, 96%, 78%)", ctx);
 // player.start();
@@ -60,18 +159,20 @@ function initCanvas(width: number, aspectRatio: number[]): void {
 }
 
 function getRandomVector(): Vector {
+  const angle = Math.random() * 2 * Math.PI;
   return {
-    x: Math.random() * 2 - 1,
-    y: Math.random() * 2 - 1,
+    x: Math.cos(angle),
+    y: Math.sin(angle),
   };
 }
 
-function incVector(vector: Vector, delta = 0.01) {
-  const angle = Math.atan2(vector.y, vector.x);
-  vector.x += Math.cos(angle);
-}
+function rotateVector(vector: Vector, angleDegrees: number) {
+  const angle = (Math.PI / 180) * angleDegrees;
 
-function decVector(vector: Vector, delta = 0.01) {
-  const angle = Math.atan2(vector.y, vector.x);
-  vector.x -= Math.sin(angle);
+  const newVector: Vector = {
+    x: vector.x * Math.cos(angle) - vector.y * Math.sin(angle),
+    y: vector.x * Math.sin(angle) + vector.y * Math.cos(angle),
+  };
+
+  return newVector;
 }
