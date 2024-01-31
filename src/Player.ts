@@ -46,12 +46,13 @@ export class Player {
   start() {
     console.log(this.colour);
     const { ctx, width, height } = this.canvasSetup;
-    ctx.strokeStyle = this.colour;
 
     document.addEventListener("keydown", (e) => this.handlePress(e));
     document.addEventListener("keyup", (e) => this.handleRelease(e));
 
     const interval = setInterval(() => {
+      ctx.strokeStyle = this.colour;
+
       ctx.beginPath();
       ctx.moveTo(this.pos.x, this.pos.y);
 
