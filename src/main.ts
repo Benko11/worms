@@ -10,6 +10,8 @@ const ctx = playField.getContext("2d") as CanvasRenderingContext2D;
 initCanvas(800, [4, 3]);
 ctx.lineWidth = 3;
 
+const player1: Player = {};
+
 function start1() {
   const pos = [400, 400];
   let vector = getRandomVector();

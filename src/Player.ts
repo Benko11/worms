@@ -1,28 +1,92 @@
-export class Player {
-  colour: string;
-  position: { x: number; y: number };
-  ctx: CanvasRenderingContext2D;
+import { Canvas } from "./interfaces/Canvas";
+import { Controls } from "./interfaces/Controls";
+import { Vector } from "./interfaces/Vector";
+import { getRandomVector } from "./utils/getRandomVector";
+import { getVectorSize } from "./utils/getVectorSize";
+import { rotateVector } from "./utils/rotateVector";
+type Position = Vector;
 
-  constructor(colour: string, ctx: CanvasRenderingContext2D) {
+export class Player {
+  canvasSetup: Canvas;
+  pos: Position;
+  controls: Controls;
+  colour: string;
+  vector: Vector;
+
+  isLeftKeyDown = false;
+  isRightKeyDown = false;
+
+  constructor(
+    canvasSetup: Canvas,
+    pos: Position,
+    controls: Controls,
+    colour: string
+  ) {
+    this.canvasSetup = canvasSetup;
+    this.pos = pos;
+    this.controls = controls;
     this.colour = colour;
-    this.position = { x: 50, y: 50 };
-    this.ctx = ctx;
+    this.vector = getRandomVector();
+  }
+
+  handleControls(e: KeyboardEvent, down: boolean) {
+    if (e.key.toLowerCase() === this.controls.left) this.isLeftKeyDown = down;
+    else if (e.key.toLowerCase() === this.controls.right)
+      this.isRightKeyDown = down;
+  }
+
+  handlePress(e: KeyboardEvent) {
+    this.handleControls(e, true);
+  }
+
+  handleRelease(e: KeyboardEvent) {
+    this.handleControls(e, false);
   }
 
   start() {
-    const movement = [Math.random(), Math.random()];
-    console.log(movement);
+    console.log(this.colour);
+    const { ctx, width, height } = this.canvasSetup;
+    ctx.strokeStyle = this.colour;
 
-    this.ctx.lineWidth = 3;
-    this.ctx.strokeStyle = this.colour;
-    setInterval(() => {
-      this.ctx.beginPath();
-      this.ctx.moveTo(this.position.x, this.position.y);
-      this.ctx.lineTo(
-        this.position.x + Math.floor(movement[0] * 30),
-        this.position.y + Math.floor(movement[1] * 30)
-      );
-      this.ctx.stroke();
-    }, 500);
+    document.addEventListener("keydown", (e) => this.handlePress(e));
+    document.addEventListener("keyup", (e) => this.handleRelease(e));
+
+    const interval = setInterval(() => {
+      ctx.beginPath();
+      ctx.moveTo(this.pos.x, this.pos.y);
+
+      const vectorSize = getVectorSize(this.vector);
+
+      const lookingX = this.pos.x + (2 * this.vector.x) / vectorSize;
+      const lookingY = this.pos.y + (2 * this.vector.y) / vectorSize;
+
+      const xxx = ctx.getImageData(lookingX, lookingY, 1, 1).data;
+      if (xxx[0] > 0) {
+        clearInterval(interval);
+        return;
+      }
+
+      this.pos.x += this.vector.x / vectorSize;
+      this.pos.y += this.vector.y / vectorSize;
+      ctx.lineTo(this.pos.x, this.pos.y);
+      ctx.stroke();
+
+      // rotate
+      const angle = 2.5;
+
+      if (this.isLeftKeyDown) {
+        this.vector = rotateVector(this.vector, -angle);
+      } else if (this.isRightKeyDown) {
+        this.vector = rotateVector(this.vector, angle);
+      }
+
+      if (
+        this.pos.x < 0 ||
+        this.pos.y < 0 ||
+        this.pos.x > width ||
+        this.pos.y > height
+      )
+        clearInterval(interval);
+    }, 20);
   }
 }
