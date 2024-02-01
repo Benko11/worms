@@ -7,4 +7,7 @@ export interface Player {
   pos: Position;
   direction: Vector;
   controls: Controls;
+  colour: string;
+  activeKey?: "LEFT" | "RIGHT";
+  score?: number;
 }

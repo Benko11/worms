@@ -22,3 +22,11 @@
   font-family: Digital;
   src: url("./assets/fonts/digital-7.ttf");
 }
+
+[data-name]::before {
+  content: attr(data-name);
+}
+
+[data-score]::before {
+  content: attr(data-score);
+}
